@@ -3,6 +3,7 @@
         "blit",
         "KEYDOWN",
         "pygame",
+        "SRCALPHA",
         "VIDEORESIZE",
         "yellowpaper"
     ]

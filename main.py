@@ -86,6 +86,24 @@ menu = False
 
 run = True
 while run:
+    #menu
+    menu_surface = pygame.Surface((.9*main_width, .9*main_height))
+    menu_surface.set_alpha(128)
+    menu_surface.fill((0,0,0))
+
+    if menu:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+                break
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_m:
+                    menu = False
+
+        main_surface.blit(menu_surface, (.05*main_width, .05*main_height))
+        screen.blit(main_surface, main_location)
+        pygame.display.flip()
+        continue
 
     info = pygame.display.Info()
     
@@ -123,6 +141,8 @@ while run:
                 if float(voltage_string) - magnitude <= 0:
                     voltage_string = IntToString(0.0)
                 else: voltage_string = IntToString(float(voltage_string)-magnitude)
+            elif event.key == pygame.K_m:
+                menu = True
             
                 #New Oil Drop
             elif event.key == pygame.K_n:
@@ -138,8 +158,6 @@ while run:
                 x_move = .01*main_width
 
 
-
-            
 
     #Draw environment
     
@@ -185,6 +203,8 @@ while run:
 
     pygame.draw.rect(main_surface, (142, 90, 69), pygame.Rect((0, 0, main_width*.4, main_height)))
     
+
+
         #Power supply
     pygame.draw.rect(main_surface, (150,150,150), pygame.Rect(((main_width*.05)/2, main_height*.72, main_width*.35, main_height * .25)))
     pygame.draw.rect(main_surface, (10,10,10), pygame.Rect(((main_width*.085)/2, main_height*.787, main_width*.272, main_height * .16)))
@@ -198,7 +218,7 @@ while run:
     pygame.draw.polygon(main_surface, (200,0,0), [(shift_point_by, .93*main_height),(shift_point_by+.015*main_width, .92*main_height),(shift_point_by+.03*main_width, .93*main_height)])
 
 
-    #7 segment display surfaces
+        #7 segment display surfaces
     tenths = pygame.Surface((.05*main_height, .09*main_height))
     tenths.fill((10,10,10))
     ones = pygame.Surface((.05*main_height, .09*main_height))
@@ -254,6 +274,7 @@ while run:
     main_surface.blit(Controls_title, (.63*main_width, .86*main_height))
     main_surface.blit(Controls_line1, (.51*main_width, .91*main_height))
     main_surface.blit(Controls_line2, (.512*main_width, .95*main_height))
+
 
     screen.blit(main_surface, main_location)
 
