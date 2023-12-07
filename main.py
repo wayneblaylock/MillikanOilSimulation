@@ -1,4 +1,6 @@
 import pygame
+import random
+import math
 
 pygame.init()
 
@@ -72,11 +74,15 @@ paper = pygame.transform.scale(paper, (.37*main_width, .65*main_height))
 #setting
 oil_types = ["Mineral Oil", "Xylene", "Water"]
 oil_density = [830,870,1000]
-oil_index = 2
-plate_separation_mm = 5
+oil_index = 0
+plate_separation_mm = 8
 drop_radius_um = 0
 excess_electrons = 0
+oil_exists = False
+oil_position = (.7*main_width, .4*main_height)
+difficulty = 1
 
+menu = False
 
 run = True
 while run:
@@ -88,10 +94,12 @@ while run:
             run = False
         if event.type == pygame.VIDEORESIZE:
             info = pygame.display.Info()
+            previous_width, previous_height = main_width, main_height
             x, y, main_width, main_height = ResizeMath(info.current_w, info.current_h)
             main_surface = pygame.Surface((main_width, main_height))
             main_location = (x,y)
             paper = pygame.transform.scale(pygame.image.load("yellowpaper.jpg"), (.37*main_width, .65*main_height))
+            oil_position = (oil_position[0]*main_height/previous_height, oil_position[1]*main_width/previous_width)
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
                 if pointer_shift < 3:
@@ -115,6 +123,21 @@ while run:
                 if float(voltage_string) - magnitude <= 0:
                     voltage_string = IntToString(0.0)
                 else: voltage_string = IntToString(float(voltage_string)-magnitude)
+            
+                #New Oil Drop
+            elif event.key == pygame.K_n:
+                oil_exists = True
+                oil_init_ticks = pygame.time.get_ticks()
+                oil_position = (main_width, .4*main_height)
+                excess_electrons = random.randint(1,30)
+                drop_radius_um = round(random.uniform(0.4, 0.7), 3)
+                drop_mass = oil_density[oil_index]*((4/3)*math.pi*(drop_radius_um*10**-6)**3)
+                F_gravity = drop_mass*9.80665
+                time_delay = 50
+                next_time = oil_init_ticks + time_delay
+                x_move = .01*main_width
+
+
 
             
 
@@ -134,6 +157,21 @@ while run:
     while start < main_width:
         pygame.draw.rect(main_surface, (75,75,75), pygame.Rect(start, 0, .002*main_height, main_height))
         start += spacing
+
+    
+        #Draw oil drop
+    if oil_position[1] < .15*main_height or oil_position[1] > .7*main_height: oil_exists = False
+    if oil_exists:
+        this_time = pygame.time.get_ticks()
+        if  this_time >= next_time:
+            x_move *= .967
+            F_electric = (float(voltage_string)/(plate_separation_mm*10**-3))*excess_electrons*1.60217663*10**-19
+            F_net_down = F_gravity - F_electric
+            Motion_down = F_net_down * 10**12 * main_height * difficulty
+            oil_position = (oil_position[0]-x_move, oil_position[1]+Motion_down)
+            
+        pygame.draw.circle(main_surface, (160,160,160), oil_position, .012*main_height)
+
 
     
     pygame.draw.rect(main_surface, (10,10,10), pygame.Rect(main_width*.4, main_height*.85, main_width*.61, main_height*.16))
@@ -200,6 +238,8 @@ while run:
     main_surface.blit(hundreds, (.065*main_width, .821*main_height))
 
         #paper
+    paper = pygame.image.load("yellowpaper.jpg")
+    paper = pygame.transform.scale(paper, (.37*main_width, .65*main_height))
     paper.blit(Notes_title_text, (.15*main_height, .05*main_height))
     paper.blit(Oil_type_text, (.025*main_height, .19*main_height))
     paper.blit(Oil_density_text, (.025*main_height, .3*main_height))
