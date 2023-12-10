@@ -75,21 +75,21 @@ paper = pygame.transform.scale(paper, (.37*main_width, .65*main_height))
 oil_types = ["Mineral Oil", "Xylene", "Water"]
 oil_density = [830,870,1000]
 oil_index = 0
+difficulty_options = ["Easy", "Normal", "Hard", "Hardest"]
+difficulty_index = 1
+settings_row_index = 0
 plate_separation_mm = 8
 drop_radius_um = 0
 excess_electrons = 0
 oil_exists = False
 oil_position = (.7*main_width, .4*main_height)
-difficulty = 1
 
 menu = False
 
 run = True
 while run:
     #menu
-    menu_surface = pygame.Surface((.9*main_width, .9*main_height))
-    menu_surface.set_alpha(128)
-    menu_surface.fill((0,0,0))
+    
 
     if menu:
         for event in pygame.event.get():
@@ -99,8 +99,54 @@ while run:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_m:
                     menu = False
+                if event.key == pygame.K_UP:
+                    if settings_row_index == 0: settings_row_index = 1
+                    else: settings_row_index = 0
+                if event.key == pygame.K_DOWN:
+                    if settings_row_index == 0: settings_row_index = 1
+                    else: settings_row_index = 0
+                if event.key == pygame.K_LEFT:
+                    if settings_row_index == 0:
+                        if oil_index > 0: oil_index -=1
+                    if settings_row_index == 1:
+                        if difficulty_index > 0: difficulty_index -=1
+                if event.key == pygame.K_RIGHT:
+                    if settings_row_index == 0:
+                        if oil_index < 2: oil_index +=1
+                    if settings_row_index == 1:
+                        if difficulty_index < 3: difficulty_index +=1
+            if event.type == pygame.VIDEORESIZE:
+                info = pygame.display.Info()
+                previous_width, previous_height = main_width, main_height
+                x, y, main_width, main_height = ResizeMath(info.current_w, info.current_h)
+                main_surface = pygame.Surface((main_width, main_height))
+                main_location = (x,y)
+                paper = pygame.transform.scale(pygame.image.load("yellowpaper.jpg"), (.37*main_width, .65*main_height))
+                oil_position = (oil_position[0]*main_height/previous_height, oil_position[1]*main_width/previous_width)
+                
 
-        main_surface.blit(menu_surface, (.05*main_width, .05*main_height))
+
+        menu_surface = pygame.Surface((main_width, main_height))
+        menu_surface.fill((0,0,0))
+        
+        if settings_row_index == 0 : y_offset = 0
+        else: y_offset = .15*main_height
+
+        pygame.draw.polygon(menu_surface, (255,255,255), [(.2*main_width, .3*main_height+y_offset), (.22*main_width, .32*main_height+y_offset), (.2*main_width, .34*main_height+y_offset)])
+
+        main_menu_text = pygame.font.Font(None, int(.08*main_height)).render("Menu", True, (255,255,255))
+        menu_surface.blit(main_menu_text, (.455*main_width, .15*main_height))
+        m_to_exit_text = pygame.font.Font(None, int(.04*main_height)).render("Press m to exit", True, (255,255,255))
+        menu_surface.blit(m_to_exit_text, (.438*main_width, .2*main_height))
+        oil_type_title = pygame.font.Font(None, int(.06*main_height)).render("Liquid:", True, (255,255,255))
+        menu_surface.blit(oil_type_title, (.3*main_width, .3*main_height))
+        oil_type_current = pygame.font.Font(None, int(.06*main_height)).render(oil_types[oil_index], True, (255,255,255))
+        menu_surface.blit(oil_type_current, (.5*main_width, .3*main_height))
+        difficulty_title = pygame.font.Font(None, int(.06*main_height)).render("Difficulty:", True, (255,255,255))
+        menu_surface.blit(difficulty_title, (.3*main_width, .45*main_height))
+        difficulty_current = pygame.font.Font(None, int(.06*main_height)).render(difficulty_options[difficulty_index], True, (255,255,255))
+        menu_surface.blit(difficulty_current, (.5*main_width, .45*main_height))
+        main_surface.blit(menu_surface, (0, 0))
         screen.blit(main_surface, main_location)
         pygame.display.flip()
         continue
@@ -143,6 +189,9 @@ while run:
                 else: voltage_string = IntToString(float(voltage_string)-magnitude)
             elif event.key == pygame.K_m:
                 menu = True
+            elif event.key == pygame.K_z:
+                if oil_exists:
+                    excess_electrons = random.randint(1,30)
             
                 #New Oil Drop
             elif event.key == pygame.K_n:
@@ -151,8 +200,6 @@ while run:
                 oil_position = (main_width, .4*main_height)
                 excess_electrons = random.randint(1,30)
                 drop_radius_um = round(random.uniform(0.4, 0.7), 3)
-                drop_mass = oil_density[oil_index]*((4/3)*math.pi*(drop_radius_um*10**-6)**3)
-                F_gravity = drop_mass*9.80665
                 time_delay = 50
                 next_time = oil_init_ticks + time_delay
                 x_move = .01*main_width
@@ -178,17 +225,25 @@ while run:
 
     
         #Draw oil drop
+    if difficulty_index == 0: difficulty = 2
+    elif difficulty_index == 1: difficulty = 1
+    elif difficulty_index == 2: difficulty = .3
+    elif difficulty_index == 3: difficulty = .1
+
     if oil_position[1] < .15*main_height or oil_position[1] > .7*main_height: oil_exists = False
     if oil_exists:
         this_time = pygame.time.get_ticks()
         if  this_time >= next_time:
             x_move *= .967
             F_electric = (float(voltage_string)/(plate_separation_mm*10**-3))*excess_electrons*1.60217663*10**-19
+            drop_mass = oil_density[oil_index]*((4/3)*math.pi*(drop_radius_um*10**-6)**3)
+            F_gravity = drop_mass*9.80665
             F_net_down = F_gravity - F_electric
             Motion_down = F_net_down * 10**12 * main_height * difficulty
             oil_position = (oil_position[0]-x_move, oil_position[1]+Motion_down)
             
-        pygame.draw.circle(main_surface, (160,160,160), oil_position, .012*main_height)
+        pygame.draw.circle(main_surface, (100,100,100), oil_position, .012*main_height)
+        pygame.draw.circle(main_surface, (130,130,130), (oil_position[0]+.002*main_width,oil_position[1]-.002*main_width), .007*main_height)
 
 
     
