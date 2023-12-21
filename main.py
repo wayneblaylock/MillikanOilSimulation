@@ -75,8 +75,8 @@ paper = pygame.transform.scale(paper, (.37*main_width, .65*main_height))
 oil_types = ["Mineral Oil", "Xylene", "Water"]
 oil_density = [830,870,1000]
 oil_index = 0
-difficulty_options = ["Easy", "Normal", "Hard", "Hardest"]
-difficulty_index = 1
+difficulty_options = ["Normal", "Hard"]
+difficulty_index = 0
 settings_row_index = 0
 plate_separation_mm = 8
 drop_radius_um = 0
@@ -109,12 +109,12 @@ while run:
                     if settings_row_index == 0:
                         if oil_index > 0: oil_index -=1
                     if settings_row_index == 1:
-                        if difficulty_index > 0: difficulty_index -=1
+                        if difficulty_index == 1: difficulty_index -=1
                 if event.key == pygame.K_RIGHT:
                     if settings_row_index == 0:
                         if oil_index < 2: oil_index +=1
                     if settings_row_index == 1:
-                        if difficulty_index < 3: difficulty_index +=1
+                        if difficulty_index == 0: difficulty_index +=1
             if event.type == pygame.VIDEORESIZE:
                 info = pygame.display.Info()
                 previous_width, previous_height = main_width, main_height
@@ -225,10 +225,8 @@ while run:
 
     
         #Draw oil drop
-    if difficulty_index == 0: difficulty = 2
-    elif difficulty_index == 1: difficulty = 1
-    elif difficulty_index == 2: difficulty = .3
-    elif difficulty_index == 3: difficulty = .1
+    if difficulty_index == 0: difficulty = 1
+    elif difficulty_index == 1: difficulty = .3
 
     if oil_position[1] < .15*main_height or oil_position[1] > .7*main_height: oil_exists = False
     if oil_exists:
