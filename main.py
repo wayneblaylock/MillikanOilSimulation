@@ -68,8 +68,8 @@ shift_point_by = 0
 
 voltage_string = "000.0"
 
-paper = pygame.image.load("yellowpaper.jpg")
-paper = pygame.transform.scale(paper, (.37*main_width, .65*main_height))
+#paper = pygame.image.load("yellowpaper.jpg")
+#paper = pygame.transform.scale(paper, (.37*main_width, .65*main_height))
 
 #setting
 oil_types = ["Mineral Oil", "Xylene", "Water"]
@@ -121,7 +121,7 @@ while run:
                 x, y, main_width, main_height = ResizeMath(info.current_w, info.current_h)
                 main_surface = pygame.Surface((main_width, main_height))
                 main_location = (x,y)
-                paper = pygame.transform.scale(pygame.image.load("yellowpaper.jpg"), (.37*main_width, .65*main_height))
+                #paper = pygame.transform.scale(pygame.image.load("yellowpaper.jpg"), (.37*main_width, .65*main_height))
                 oil_position = (oil_position[0]*main_height/previous_height, oil_position[1]*main_width/previous_width)
                 
 
@@ -162,7 +162,7 @@ while run:
             x, y, main_width, main_height = ResizeMath(info.current_w, info.current_h)
             main_surface = pygame.Surface((main_width, main_height))
             main_location = (x,y)
-            paper = pygame.transform.scale(pygame.image.load("yellowpaper.jpg"), (.37*main_width, .65*main_height))
+            #paper = pygame.transform.scale(pygame.image.load("yellowpaper.jpg"), (.37*main_width, .65*main_height))
             oil_position = (oil_position[0]*main_height/previous_height, oil_position[1]*main_width/previous_width)
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
@@ -225,8 +225,8 @@ while run:
 
     
         #Draw oil drop
-    if difficulty_index == 0: difficulty = 1
-    elif difficulty_index == 1: difficulty = .3
+    if difficulty_index == 0: difficulty = .3
+    elif difficulty_index == 1: difficulty = 1
 
     if oil_position[1] < .15*main_height or oil_position[1] > .7*main_height: oil_exists = False
     if oil_exists:
@@ -311,8 +311,14 @@ while run:
     main_surface.blit(hundreds, (.065*main_width, .821*main_height))
 
         #paper
-    paper = pygame.image.load("yellowpaper.jpg")
-    paper = pygame.transform.scale(paper, (.37*main_width, .65*main_height))
+    """paper = pygame.image.load("yellowpaper.jpg")
+    paper = pygame.transform.scale(paper, (.37*main_width, .65*main_height))"""
+    paper = pygame.Surface((.37*main_width, .65*main_height))
+    paper.fill((251,244,161))
+    for i in range(1,19):
+        spacing = .035*main_height
+        pygame.draw.rect(paper, (218, 225, 158), pygame.Rect(0, i*spacing, main_width*.37, main_height*.005))
+    pygame.draw.rect(paper, (243, 193, 130), pygame.Rect(main_width*.05, 0, main_width*.005, main_height*.65))
     paper.blit(Notes_title_text, (.15*main_height, .05*main_height))
     paper.blit(Oil_type_text, (.025*main_height, .19*main_height))
     paper.blit(Oil_density_text, (.025*main_height, .3*main_height))
